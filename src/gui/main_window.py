@@ -2,7 +2,7 @@ from PySide2 import QtWidgets
 from gui.ui_main_window import Ui_MainWindow
 from PySide2.QtWidgets  import QFileDialog, QMainWindow, QDialog, QHeaderView
 from PySide2.QtCore import Qt, QThreadPool
-from PySide2.QtGui import QIntValidator
+from PySide2.QtGui import QIcon, QIntValidator
 import logging
 from thread.resize import ResizeThread
 from config import Config
@@ -17,8 +17,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     self.setWindowTitle("Wiopt - Web images optimizer")
     self.setMinimumWidth(800)
     self.setMinimumHeight(600)
+    self.load_icon()
     self.connect()
     self.load_config()
+
+  def load_icon(self):
+    icon = QIcon("wiopt.png")
+    self.setWindowIcon(icon)
 
   def connect(self):
     logging.debug('Connect browse_btn_browse to openbox')
@@ -41,12 +46,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
   def load_config(self):
     conf = Config.read()
+    path = conf['last_open_path']
+
+    if (FileUtils.exists(path) == False):
+      logging.debug("Folder is not existing, set path to empty")
+      path = ''
+
     logging.debug('Current config {}'.format(conf))
-    self.browse_le_path.setText(conf['last_open_path'])
+    self.browse_le_path.setText(path)
     self.config_le_standard_width.setText(conf['standard_width'])
     self.config_le_max_size_kb.setText(conf['max_size_kb'])
     self.config_le_prefix.setText(conf['last_prefix'])
     self.config_le_postfix.setText(conf['last_postfix'])
+
+    if (path is not None and path != ''):
+      self.update_browse_section(conf['last_open_path'])
 
   def openbox(self):
     dialog = QFileDialog(self)

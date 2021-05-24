@@ -1,17 +1,22 @@
 from PIL import Image
 import logging
-import sys
+import os.path
 from utils.file_utils import FileUtils
 
 class ImageResizer:
   def __init__(self, image_path: str, size_limit_kb: int, prefix: str, postfix: str):
     logging.info("")
     logging.info("Read image {}".format(image_path))
+
+    logging.debug("Encode and decode for windows path")
+    image_path = image_path.encode().decode('utf-8')
+
     self.path = image_path
     self.prefix = prefix
     self.postfix = postfix
     self.img = Image.open(image_path)
     self.size_limit_kb = size_limit_kb
+    self.quality_limit = 10
     width, height = self.img.size
 
     logging.info("Image read width, height {}x{}".format(width, height))
@@ -39,14 +44,15 @@ class ImageResizer:
     quality = 95
 
     while True:
-      self.img.save(new_path, format='jpeg', optimize=True, quality=quality)
+      file = open(os.path.normpath(new_path), 'w')
+      self.img.save(file, format='jpeg', optimize=True, quality=quality)
       new_file_size_kb = (int)(FileUtils.get_file_size(new_path) / 1024)
 
-      if (new_file_size_kb < self.size_limit_kb):
+      if (new_file_size_kb <= self.size_limit_kb):
         logging.debug("File size {}KB is acceptable".format(new_file_size_kb))
         break
-      elif (quality <= 50):
-        logging.debug("Quality is too low, current quality <= 50%, save file")
+      elif (quality <= self.quality_limit):
+        logging.debug("Quality is too low, current quality <= {}%, save file".format(self.quality_limit))
         break
       else:
         quality = quality - 5

@@ -18,7 +18,7 @@ def _show_file_linux(path: str):
     subprocess.check_call(["xdg-open", "--", path])
 
 def _show_file_win32(path: str):
-    subprocess.check_call(["explorer", "/select", path])
+    subprocess.Popen('explorer /select,"{}"'.format(os.path.normpath(path)))
 
 _show_file_func = {'darwin': _show_file_darwin, 
                    'linux': _show_file_linux,
@@ -26,15 +26,14 @@ _show_file_func = {'darwin': _show_file_darwin,
 
 class FileUtils:
   @staticmethod
-  def get_resized_image_name(file_location: str, prefix: str, postfix: str):
-    filename = file_location.split('/')[-1]
-    location = file_location.split('/')[0:-1]
-    filename = filename.split('.')
-    filename[0] += postfix
-    filename[0] = prefix + filename[0]
-    filename = '.'.join(filename)
-    new_path = '/'.join(location) + '/' + filename
-    return new_path
+  def get_resized_image_name(path: str, prefix: str, postfix: str):
+    name,ext = os.path.splitext(os.path.basename(path))
+    dir = os.path.dirname(path)
+    return "{}/{}{}{}{}".format(dir, prefix, name, postfix, ext)
+
+  @staticmethod
+  def exists(path: str):
+    return os.path.exists(path)
 
   @staticmethod
   def get_file_size(path: str):
