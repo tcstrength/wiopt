@@ -135,6 +135,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     # Config.write('last_prefix', prefix)
     # Config.write('last_postfix', postfix)
+    Config.write('window_width', self.width())
+    Config.write('window_height', self.height())
     Config.write('max_size_kb', max_kb)
     Config.write('standard_width', width)
     Config.write('save_dir', self.config_le_output.text())
