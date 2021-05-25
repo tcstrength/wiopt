@@ -21,7 +21,10 @@ pip install pillow, piexif
 pip install pyside2
 ```
 
-- Go to directory src, rename `wiopt.py` to `wiopt.pyw`
+Go to directory src, rename `wiopt.py` to `wiopt.pyw`
 ![pyw](./img/example-pyw.png)
 
 - Now just double click in `wiopt.pyw` and enjoy.
+
+## Screenshots
+![pyw](./img/screenshot.png)
