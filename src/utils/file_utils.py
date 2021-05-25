@@ -2,7 +2,6 @@ import os
 import logging
 from os import listdir, stat
 from os.path import isfile, join
-
 import subprocess
 import sys
 
@@ -25,6 +24,13 @@ _show_file_func = {'darwin': _show_file_darwin,
                    'win32': _show_file_win32}
 
 class FileUtils:
+
+  @staticmethod
+  def mkdir_ine(path: str):
+    logging.debug("Make directory {} if not exists".format(path))
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
+
   @staticmethod
   def get_resized_image_name(path: str, prefix: str, postfix: str):
     name,ext = os.path.splitext(os.path.basename(path))

@@ -4,6 +4,7 @@ from PySide2.QtWidgets  import QFileDialog, QMainWindow, QDialog, QHeaderView
 from PySide2.QtCore import Qt, QThreadPool
 from PySide2.QtGui import QIcon, QIntValidator
 import logging
+import os.path
 from thread.resize import ResizeThread
 from config import Config
 from utils.file_utils import FileUtils
@@ -15,8 +16,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     self.threadpool = QThreadPool()
     self.setupUi(self)
     self.setWindowTitle("Wiopt - Web images optimizer")
-    self.setMinimumWidth(800)
-    self.setMinimumHeight(600)
+    self.setMinimumWidth(600)
+    self.setMinimumHeight(400)
     self.load_icon()
     self.connect()
     self.load_config()
@@ -56,14 +57,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     self.browse_le_path.setText(path)
     self.config_le_standard_width.setText(conf['standard_width'])
     self.config_le_max_size_kb.setText(conf['max_size_kb'])
-    self.config_le_prefix.setText(conf['last_prefix'])
-    self.config_le_postfix.setText(conf['last_postfix'])
+    # self.config_le_prefix.setText(conf['last_prefix'])
+    # self.config_le_postfix.setText(conf['last_postfix'])
+    self.config_le_output.setText(conf['save_dir'])
+    self.image_author.setText(conf['image_authors_copyright'])
+    self.image_comments.setText(conf['image_comments'])
+    self.image_title.setText(conf['image_title'])
+    self.image_subject.setText(conf['image_subject'])
+    
+    width = int(conf['window_width'])
+    height = int(conf['window_height'])
+
+    self.resize(width, height)
 
     if (path is not None and path != ''):
       self.update_browse_section(conf['last_open_path'])
 
   def openbox(self):
-    dialog = QFileDialog(self)
+    path = os.path.normpath(self.browse_le_path.text())
+    dialog = QFileDialog(self, directory=path)
     dialog.setOption(QFileDialog.ShowDirsOnly, True)
     dialog.setFileMode(QFileDialog.DirectoryOnly)
 
@@ -83,7 +95,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     logging.info("Set browse_le_path text to {}".format(path))
     self.browse_le_path.setText(path)
     self.browse_tbv_info.setRowCount(0)
-    prefix = self.config_le_prefix.text()
+    # prefix = self.config_le_prefix.text()
+    prefix = ''
     new_width = int(self.config_le_standard_width.text())
 
     self.statusbar.showMessage("Đã chọn đường dẫn {}".format(path))
@@ -113,15 +126,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     self.statusbar.showMessage("Mở {} ảnh".format(self.browse_tbv_info.rowCount()))
 
   def start_resizing(self):
-    prefix = self.config_le_prefix.text()
-    postfix = self.config_le_postfix.text()
+    # prefix = self.config_le_prefix.text()
+    # postfix = self.config_le_postfix.text()
+    prefix = self.config_le_output.text() + '/'
+    postfix = ''
     width = (int)(self.config_le_standard_width.text())
     max_kb = (int)(self.config_le_max_size_kb.text())
 
-    Config.write('last_prefix', prefix)
-    Config.write('last_postfix', postfix)
+    # Config.write('last_prefix', prefix)
+    # Config.write('last_postfix', postfix)
     Config.write('max_size_kb', max_kb)
-    Config.write("standard_width", width)
+    Config.write('standard_width', width)
+    Config.write('save_dir', self.config_le_output.text())
+    Config.write('image_comments', self.image_comments.text())
+    Config.write('image_title', self.image_title.text())
+    Config.write('image_subject', self.image_subject.text())
+    Config.write('image_authors_copyright', self.image_author.text())
 
     resize_thread = ResizeThread()
     resize_thread.set_status_bar(self.statusbar)
@@ -130,6 +150,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     resize_thread.set_postfix(postfix)
     resize_thread.set_standard_width(width)
     resize_thread.set_max_size_kb(max_kb)
+    resize_thread.set_metadata(Config.read())
 
     self.threadpool.start(resize_thread)
 

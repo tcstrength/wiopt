@@ -9,6 +9,9 @@ import logging
 from utils.file_utils import FileUtils
 
 class ResizeThread(QRunnable):
+  def set_metadata(self, metadata: dict):
+    self.metadata = metadata
+
   def set_status_bar(self, status_bar: QStatusBar):
     self.status_bar = status_bar
 
@@ -44,7 +47,7 @@ class ResizeThread(QRunnable):
 
     for i in range(selected_row, row_count):
       path = self.table_view.item(i, 0).text()
-      resizer = ImageResizer(path, self.max_size_kb, self.prefix, self.postfix)
+      resizer = ImageResizer(path, self.max_size_kb, self.prefix, self.postfix, self.metadata)
       new_path = resizer.resize_with_width(self.standard_width)
       file_size = FileUtils.get_file_size(new_path)
       # self.table_view.selectRow(i)
